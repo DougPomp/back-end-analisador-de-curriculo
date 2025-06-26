@@ -133,11 +133,11 @@ curl -X POST \
 
 ## 🤝 Como Contribuir
 
-Este é um projeto feito pela comunidade e para a comunidade. Toda contribuição é bem-vinda\! Se você é um Zeronauta e quer participar, por favor, leia nosso **[GUIA DE CONTRIBUIÇÃO](https://www.google.com/search?q=CONTRIBUTING.md)** para entender nosso fluxo de trabalho no GitHub.
+Este é um projeto feito pela comunidade e para a comunidade. Toda contribuição é bem-vinda\!
 
 ## 📝 Licença
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](https://www.google.com/search?q=LICENSE) para mais detalhes.
+Este projeto está sob a licença MIT. Veja o arquivo para mais detalhes.
 
 -----
 
