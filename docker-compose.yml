@@ -1,0 +1,30 @@
+# docker-compose.yml
+# Este arquivo será usado na sua VPS para gerenciar o contêiner.
+
+version: '3.8'
+
+services:
+  # O nome do nosso serviço
+  analisador-de-curriculo:
+    # A imagem que será baixada do Docker Hub.
+    # IMPORTANTE: Substitua 'seu-usuario-dockerhub' pelo seu nome de usuário real no Docker Hub.
+    image: zeronauta/analisador-de-curriculo:latest
+    # Reinicia o contêiner automaticamente se ele parar por algum motivo.
+    restart: always
+    # O nome que o contêiner terá no seu servidor.
+    container_name: analisador_de_curriculo_app
+    # Carrega as variáveis de ambiente a partir de um arquivo .env no servidor.
+    # Isso mantém suas chaves secretas seguras e fora do controle de versão.
+    env_file:
+      - ./.env
+    # Mapeia a porta 5000 do contêiner para a porta 5000 da sua VPS.
+    # Formato: <porta_na_vps>:<porta_no_container>
+    ports:
+      - "5000:5000"
+    # Garante que os logs do contêiner sejam gerenciados de forma eficiente.
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
