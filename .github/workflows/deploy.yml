@@ -80,11 +80,11 @@ jobs:
             EOF
 
             # Baixa a imagem mais recente do Docker Hub
-            docker-compose pull
+            docker compose pull
 
             # Sobe o serviço com a nova imagem em modo 'detached' (background)
             # --remove-orphans remove contêineres antigos se o serviço for renomeado
-            docker-compose up -d --remove-orphans
+            docker compose up -d --remove-orphans
 
             # Limpa imagens Docker antigas e não utilizadas para economizar espaço
             docker image prune -af
