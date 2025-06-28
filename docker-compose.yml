@@ -1,30 +1,60 @@
 # docker-compose.yml
-# Este arquivo será usado na sua VPS para gerenciar o contêiner.
+# Este é o único arquivo que vamos precisar. Ele gerencia TODOS os nossos serviços.
 
 version: '3.8'
 
+# A rede que conecta nossos serviços de forma segura.
+networks:
+  proxy-network:
+    driver: bridge
+    name: proxy-network # Garante que o nome da rede seja sempre o mesmo.
+
 services:
-  # O nome do nosso serviço
-  analisador-de-curriculo:
-    # A imagem que será baixada do Docker Hub.
-    # IMPORTANTE: Substitua 'seu-usuario-dockerhub' pelo seu nome de usuário real no Docker Hub.
+  # 1. Nosso aplicativo Analisador de Currículo
+  app:
+    # Constrói a imagem a partir do Dockerfile local.
+    build: .
+    # Usa a imagem que foi enviada para o Docker Hub pela Action.
     image: zeronauta/analisador-de-curriculo:latest
-    # Reinicia o contêiner automaticamente se ele parar por algum motivo.
-    restart: always
-    # O nome que o contêiner terá no seu servidor.
     container_name: analisador_de_curriculo_app
-    # Carrega as variáveis de ambiente a partir de um arquivo .env no servidor.
-    # Isso mantém suas chaves secretas seguras e fora do controle de versão.
+    restart: always
     env_file:
-      - ./.env
-    # Mapeia a porta 5000 do contêiner para a porta 5000 da sua VPS.
-    # Formato: <porta_na_vps>:<porta_no_container>
+      - ./.env # Carrega a chave da API
+    networks:
+      # Conecta APENAS à rede interna do proxy.
+      - proxy-network
+    # NENHUMA PORTA EXPOSTA PARA O HOST!
+
+  # 2. O Nginx Proxy Manager
+  nginx-proxy:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: nginx_proxy_manager_app
+    restart: unless-stopped
     ports:
-      - "5000:5000"
-    # Garante que os logs do contêiner sejam gerenciados de forma eficiente.
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+      # As únicas portas abertas para o mundo.
+      - '80:80'
+      - '443:443'
+      - '81:81'
+    volumes:
+      # Os dados do NPM ficam salvos na VPS dentro de ./npm-data
+      - ./npm-data/data:/data
+      - ./npm-data/letsencrypt:/etc/letsencrypt
+    networks:
+      - proxy-network
+
+  # 3. O Banco de Dados do NPM
+  npm-db:
+    image: 'jc21/mariadb-aria:latest'
+    container_name: nginx_proxy_manager_db
+    restart: unless-stopped
+    environment:
+      # As senhas agora podem ser gerenciadas pelo arquivo .env também!
+      MYSQL_ROOT_PASSWORD: ${NPM_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: 'npm'
+      MYSQL_USER: 'npm'
+      MYSQL_PASSWORD: ${NPM_DB_PASSWORD}
+    volumes:
+      - ./npm-data/mysql:/var/lib/mysql
+    networks:
+      - proxy-network
 

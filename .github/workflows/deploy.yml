@@ -1,51 +1,37 @@
 # .github/workflows/deploy.yml
-# Este é o cérebro da nossa automação.
 
 name: Deploy Analisador de Currículo
 
-# Gatilho: A action será acionada a cada 'push' na branch 'main'.
 on:
   push:
     branches:
       - main
 
-# Variáveis de Ambiente Globais para o Workflow
 env:
-  # IMPORTANTE: Substitua pelo seu usuário no Docker Hub e nome da imagem.
   DOCKER_IMAGE_NAME: zeronauta/analisador-de-curriculo
 
 jobs:
-  # O único job que teremos: 'deploy'
   deploy:
-    # O job rodará em uma máquina virtual Ubuntu fornecida pelo GitHub.
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout do Código
-      # Baixa o código do seu repositório para a máquina virtual da action.
       - name: Checkout do código
         uses: actions/checkout@v4
 
-      # 2. Login no Docker Hub
-      # Faz o login no Docker Hub usando os segredos que vamos configurar no GitHub.
       - name: Login no Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 3. Build e Push da Imagem Docker
-      # Constrói a imagem a partir do Dockerfile e a envia para o Docker Hub.
-      - name: Build e Push da imagem Docker
+      - name: Build e Push da imagem da aplicação
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ./Dockerfile
           push: true
-          # A tag 'latest' aponta para a versão mais recente.
           tags: ${{ env.DOCKER_IMAGE_NAME }}:latest
 
-      # 4. Deploy na VPS via SSH
-      # Conecta na sua VPS e executa os comandos para atualizar a aplicação.
       - name: Deploy na VPS
         uses: appleboy/ssh-action@master
         with:
@@ -56,40 +42,20 @@ jobs:
             # Navega até a pasta do projeto na VPS
             cd ~/analisador-de-curriculo
 
-            # Cria ou atualiza o arquivo .env com a chave da OpenAI a partir dos segredos do GitHub
+            # Clona ou atualiza o repositório para ter o docker-compose.yml mais recente
+            # Este é um método mais robusto do que copiar arquivos
+            git clone https://github.com/DougPomp/back-end-analisador-de-curriculo.git . || git pull
+
+            # Cria o arquivo .env com TODOS os segredos necessários
             echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > .env
+            echo "NPM_DB_ROOT_PASSWORD=${{ secrets.NPM_DB_ROOT_PASSWORD }}" >> .env
+            echo "NPM_DB_PASSWORD=${{ secrets.NPM_DB_PASSWORD }}" >> .env
 
-            # Cria ou atualiza o docker-compose.yml
-            # (Aqui estamos criando o arquivo diretamente, mas poderia ser copiado do repo)
-            cat <<EOF > docker-compose.yml
-            version: '3.8'
-            services:
-              analisador-de-curriculo:
-                image: ${{ env.DOCKER_IMAGE_NAME }}:latest
-                restart: always
-                container_name: analisador_de_curriculo_app
-                env_file:
-                  - ./.env
-                networks:
-                  - proxy-network # Apenas conecta à rede interna do proxy
-                logging:
-                  driver: "json-file"
-                  options:
-                    max-size: "10m"
-                    max-file: "3"
-            
-            # Declara que a rede 'proxy-network' é externa, pois foi criada pelo NPM.
-            networks:
-              proxy-network:
-                external: true
-            EOF
+            # Baixa a imagem mais recente da nossa aplicação que foi enviada ao Docker Hub
+            docker compose pull app
 
-            # Baixa a imagem mais recente do Docker Hub
-            docker compose pull
-
-            # Sobe o serviço com a nova imagem em modo 'detached' (background)
-            # --remove-orphans remove contêineres antigos se o serviço for renomeado
+            # Sobe TODOS os serviços definidos no docker-compose.yml
             docker compose up -d --remove-orphans
 
-            # Limpa imagens Docker antigas e não utilizadas para economizar espaço
+            # Limpa imagens Docker antigas
             docker image prune -af
