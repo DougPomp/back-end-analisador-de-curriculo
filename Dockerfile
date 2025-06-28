@@ -4,8 +4,8 @@
 FROM python:3.9-slim
 
 # 2. Variáveis de Ambiente: Evita que o Python gere arquivos .pyc e bufferize os logs.
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # 3. Diretório de Trabalho: Define o diretório onde nossa aplicação ficará dentro do contêiner.
 WORKDIR /app
