@@ -39,12 +39,21 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            # Navega até a pasta do projeto na VPS
+            # Garante que o diretório do projeto exista
+            mkdir -p ~/analisador-de-curriculo
             cd ~/analisador-de-curriculo
 
-            # Clona ou atualiza o repositório para ter o docker-compose.yml mais recente
-            # Este é um método mais robusto do que copiar arquivos
-            git clone https://github.com/DougPomp/back-end-analisador-de-curriculo.git . || git pull
+            # Bloco de atualização do repositório à prova de falhas
+            # 1. Garante que o diretório seja um repositório git
+            git init
+            # 2. Adiciona/atualiza o repositório remoto
+            git remote add origin https://github.com/DougPomp/back-end-analisador-de-curriculo.git || git remote set-url origin https://github.com/DougPomp/back-end-analisador-de-curriculo.git
+            # 3. Baixa todos os objetos do repositório
+            git fetch origin
+            # 4. Limpa quaisquer arquivos não rastreados
+            git clean -fd
+            # 5. Força a atualização para o estado exato da branch 'main'
+            git reset --hard origin/main
 
             # Cria o arquivo .env com TODOS os segredos necessários
             echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > .env
