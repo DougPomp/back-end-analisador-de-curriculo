@@ -21,11 +21,6 @@ def info():
             "deploy": "Vercel + Render/Fly.io"
         },
         "status": "Em desenvolvimento",
-        "endpoints": {
-            "POST /upload": "Recebe o arquivo de currículo",
-            "GET /resumo": "Retorna o resumo gerado pela IA",
-            "GET /": "Exibe as informações do projeto"
-        }
     })
 
 if __name__ == '__main__':
