@@ -70,13 +70,18 @@ jobs:
                 container_name: analisador_de_curriculo_app
                 env_file:
                   - ./.env
-                ports:
-                  - "5000:5000"
+                networks:
+                  - proxy-network # Apenas conecta à rede interna do proxy
                 logging:
                   driver: "json-file"
                   options:
                     max-size: "10m"
                     max-file: "3"
+            
+            # Declara que a rede 'proxy-network' é externa, pois foi criada pelo NPM.
+            networks:
+              proxy-network:
+                external: true
             EOF
 
             # Baixa a imagem mais recente do Docker Hub
