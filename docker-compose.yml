@@ -16,5 +16,5 @@ services:
       - ./.env # Carrega a chave da API
     networks:
       # Conecta o container à rede interna
-      - app-network
+      - proxy-network
     # NENHUMA PORTA EXPOSTA PARA O HOST!
