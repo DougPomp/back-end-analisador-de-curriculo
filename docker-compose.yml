@@ -1,20 +1,18 @@
 version: '3.8'
 
-# Define a rede interna para a aplicação
-networks:
-  app-network:
-    driver: bridge
-
 services:
-  # 1. Nosso aplicativo Analisador de Currículo
   app:
     build: .
     image: zeronauta/analisador-de-curriculo:latest
     container_name: analisador_de_curriculo_app
     restart: always
     env_file:
-      - ./.env # Carrega a chave da API
+      - ./.env
+    # Conecta o serviço à rede externa definida abaixo
     networks:
-      # Conecta o container à rede interna
       - proxy-network
-    # NENHUMA PORTA EXPOSTA PARA O HOST!
+
+# Informa ao Docker que 'proxy-network' é uma rede existente
+networks:
+  proxy-network:
+    external: true
