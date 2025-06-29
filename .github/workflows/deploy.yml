@@ -1,4 +1,3 @@
-# .github/workflows/deploy.yml
 
 name: Deploy Analisador de Currículo
 
@@ -43,27 +42,16 @@ jobs:
             mkdir -p ~/analisador-de-curriculo
             cd ~/analisador-de-curriculo
 
-            # Bloco de atualização do repositório à prova de falhas
-            # 1. Garante que o diretório seja um repositório git
-            git init
-            # 2. Adiciona/atualiza o repositório remoto
-            git remote add origin https://github.com/DougPomp/back-end-analisador-de-curriculo.git || git remote set-url origin https://github.com/DougPomp/back-end-analisador-de-curriculo.git
-            # 3. Baixa todos os objetos do repositório
-            git fetch origin
-            # 4. Limpa quaisquer arquivos não rastreados
-            git clean -fd
-            # 5. Força a atualização para o estado exato da branch 'main'
-            git reset --hard origin/main
+            # Faz o pull do repositório para obter o docker-compose.yml mais recente
+            git pull origin main
 
-            # Cria o arquivo .env com TODOS os segredos necessários
+            # Cria o arquivo .env com a chave da API
             echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > .env
-            echo "NPM_DB_ROOT_PASSWORD=${{ secrets.NPM_DB_ROOT_PASSWORD }}" >> .env
-            echo "NPM_DB_PASSWORD=${{ secrets.NPM_DB_PASSWORD }}" >> .env
 
-            # Baixa a imagem mais recente da nossa aplicação que foi enviada ao Docker Hub
+            # Baixa a imagem mais recente da aplicação
             docker compose pull app
 
-            # Sobe TODOS os serviços definidos no docker-compose.yml
+            # Sobe apenas o serviço da aplicação
             docker compose up -d --remove-orphans
 
             # Limpa imagens Docker antigas
