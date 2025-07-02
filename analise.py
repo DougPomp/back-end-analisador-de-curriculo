@@ -36,7 +36,7 @@ def analisar_texto_com_ia(texto_curriculo: str) -> dict:
 
     try:
         response = openai.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4.1-nano",
             messages=[
                 {"role": "system",
                  "content": "Você é um assistente de RH especializado em extrair informações de currículos e retornar dados em formato JSON."},

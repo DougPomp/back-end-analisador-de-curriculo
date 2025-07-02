@@ -2,11 +2,15 @@ from flask import Flask, jsonify, request
 import logging
 from extracao import extrair_texto_de_pdf
 from analise import analisar_texto_com_ia
+from flask_cors import CORS
 
 # Configuração básica de logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
+
+# Libera CORS para um domínio específico:
+CORS(app, resources={r"/*": {"origins": "https://curriculo-ai.zeronauta.com.br"}})
 
 # Define um limite máximo para o tamanho do arquivo (5MB)
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
