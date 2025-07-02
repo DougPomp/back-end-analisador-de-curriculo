@@ -1,60 +1,18 @@
-# docker-compose.yml
-# Este é o único arquivo que vamos precisar. Ele gerencia TODOS os nossos serviços.
-
 version: '3.8'
 
-# A rede que conecta nossos serviços de forma segura.
-networks:
-  proxy-network:
-    driver: bridge
-    name: proxy-network # Garante que o nome da rede seja sempre o mesmo.
-
 services:
-  # 1. Nosso aplicativo Analisador de Currículo
   app:
-    # Constrói a imagem a partir do Dockerfile local.
     build: .
-    # Usa a imagem que foi enviada para o Docker Hub pela Action.
     image: zeronauta/analisador-de-curriculo:latest
     container_name: analisador_de_curriculo_app
     restart: always
     env_file:
-      - ./.env # Carrega a chave da API
-    networks:
-      # Conecta APENAS à rede interna do proxy.
-      - proxy-network
-    # NENHUMA PORTA EXPOSTA PARA O HOST!
-
-  # 2. O Nginx Proxy Manager
-  nginx-proxy:
-    image: 'jc21/nginx-proxy-manager:latest'
-    container_name: nginx_proxy_manager_app
-    restart: unless-stopped
-    ports:
-      # As únicas portas abertas para o mundo.
-      - '80:80'
-      - '443:443'
-      - '81:81'
-    volumes:
-      # Os dados do NPM ficam salvos na VPS dentro de ./npm-data
-      - ./npm-data/data:/data
-      - ./npm-data/letsencrypt:/etc/letsencrypt
+      - ./.env
+    # Conecta o serviço à rede externa definida abaixo
     networks:
       - proxy-network
 
-  # 3. O Banco de Dados do NPM
-  npm-db:
-    image: 'jc21/mariadb-aria:latest'
-    container_name: nginx_proxy_manager_db
-    restart: unless-stopped
-    environment:
-      # As senhas agora podem ser gerenciadas pelo arquivo .env também!
-      MYSQL_ROOT_PASSWORD: ${NPM_DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: 'npm'
-      MYSQL_USER: 'npm'
-      MYSQL_PASSWORD: ${NPM_DB_PASSWORD}
-    volumes:
-      - ./npm-data/mysql:/var/lib/mysql
-    networks:
-      - proxy-network
-
+# Informa ao Docker que 'proxy-network' é uma rede existente
+networks:
+  proxy-network:
+    external: true
