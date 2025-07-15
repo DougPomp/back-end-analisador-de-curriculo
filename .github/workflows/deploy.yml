@@ -32,7 +32,7 @@ jobs:
           tags: ${{ env.DOCKER_IMAGE_NAME }}:latest
 
       - name: Deploy na VPS
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.0.0 # Versão fixada (verificar a mais recente tag estável)
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
@@ -45,11 +45,21 @@ jobs:
             # Faz o pull do repositório para obter o docker-compose.yml mais recente
             git pull origin main
 
-            # Cria o arquivo .env com a chave da API
-            echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > .env
+            # A CHAVE OPENAI_API_KEY DEVE SER CONFIGURADA NO AMBIENTE DO SERVIDOR VPS
+            # E O docker-compose.yml DEVE SER AJUSTADO PARA PASSÁ-LA AO CONTÊINER.
+            # Exemplo de como o docker-compose.yml poderia ser:
+            # services:
+            #   app:
+            #     image: ${{ env.DOCKER_IMAGE_NAME }}:latest
+            #     environment:
+            #       - OPENAI_API_KEY=${OPENAI_API_KEY} # Esta variável é lida do ambiente do host
+            #     ports:
+            #       - "5000:5000"
+            # (O comando abaixo que criava o .env foi removido)
+            # # echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > .env
 
             # Baixa a imagem mais recente da aplicação
-            docker compose pull app
+            docker compose pull app # Garante que o serviço 'app' esteja definido no docker-compose.yml
 
             # Sobe apenas o serviço da aplicação
             docker compose up -d --remove-orphans

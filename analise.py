@@ -51,7 +51,7 @@ def analisar_texto_com_ia(texto_curriculo: str) -> dict:
         return json.loads(resultado_json_str)
 
     except json.JSONDecodeError:
-        logging.error(f"Erro ao decodificar o JSON retornado pela IA. Resposta recebida: {resultado_json_str}")
+        logging.error(f"Erro ao decodificar o JSON retornado pela IA. Comprimento da resposta: {len(resultado_json_str)}. Início da resposta (primeiros 100 caracteres): '{resultado_json_str[:100]}...'")
         raise ValueError("A resposta da IA não estava em um formato JSON válido.")
     except Exception as e:
         logging.error(f"Erro ao chamar a API da OpenAI: {e}", exc_info=True)

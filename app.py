@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 import logging
+from werkzeug.exceptions import RequestEntityTooLarge # Adicionado
 from extracao import extrair_texto_de_pdf
 from analise import analisar_texto_com_ia
 from flask_cors import CORS
@@ -64,12 +65,11 @@ def analisar_curriculo_route():
     except ConnectionError as e:
         # Erro de comunicação com serviço externo (OpenAI)
         return jsonify({"erro": str(e)}), 502  # Bad Gateway
+    except RequestEntityTooLarge as e: # Tratamento específico
+        logging.warning("Tentativa de upload de arquivo maior que o limite permitido.")
+        return jsonify({"erro": "Arquivo muito grande. O limite é de 5MB."}), 413
     except Exception as e:
-        # Trata erros inesperados, incluindo o de arquivo muito grande (RequestEntityTooLarge)
-        if 'Request Entity Too Large' in str(e):
-            logging.warning("Tentativa de upload de arquivo maior que o limite permitido.")
-            return jsonify({"erro": "Arquivo muito grande. O limite é de 5MB."}), 413
-
+        # Trata outros erros inesperados
         logging.error(f"Ocorreu um erro inesperado: {e}", exc_info=True)
         return jsonify({"erro": "Ocorreu um erro interno no servidor."}), 500
 
