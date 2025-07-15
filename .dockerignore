@@ -1,0 +1,44 @@
+# Git files
+.git
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+
+# Python cache
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+
+# Environment files
+.env
+*.env
+
+# IDE and OS specific files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.DS_Store
+Thumbs.db
+
+# Test files and directories (if any, adjust as needed)
+# tests/
+# .pytest_cache/
+# htmlcov/
+# .coverage
+
+# Build artifacts (if any)
+# dist/
+# build/
+# *.egg-info/
+
+# Notebooks (if not part of the application)
+# *.ipynb
+
+# Secrets and sensitive files (add any other specific ones)
+# secrets/
+# *.pem
+# *.key
